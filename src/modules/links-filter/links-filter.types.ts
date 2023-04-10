@@ -1,0 +1,13 @@
+export type UrlParts =
+  | 'protocol'
+  | 'hash'
+  | 'query'
+  | 'pathname'
+  | 'auth'
+  | 'host'
+  | 'port'
+  | 'hostname'
+  | 'password'
+  | 'username'
+  | 'origin'
+  | 'href'
