@@ -9,11 +9,18 @@ import axios from 'axios'
 import { promiseWithTimeout, sleep } from '../../utils'
 import YandexSearchPage from './pages/yandex-search.page'
 import { XEvilService } from '../xevil/xevil.service'
-import { YANDEX_CHECKBOX_CAPTCHA, YANDEX_IMAGE_CAPTCHA, YANDEX_INITIAL_PAGE, YANDEX_SEARCH_RESULT } from './constants'
+import {
+  YANDEX_CHECKBOX_CAPTCHA,
+  YANDEX_IMAGE_CAPTCHA,
+  YANDEX_INITIAL_PAGE,
+  YANDEX_SEARCH_RESULT,
+  YANDEX_SMART_CLICK_CAPTCHA,
+} from './constants'
 import { SearchConfig } from '../../config/search-engine.config'
 import { CaptchaConfig } from '../../config/captcha.config'
 import { Logger } from '../logger/logger.service'
 import { ParserConfig } from '../../config/parser.config'
+import { CaptchaGuruService } from '../captcha-guru/captcha-guru.service'
 
 @Injectable()
 export class YandexSearchParserService {
@@ -25,6 +32,7 @@ export class YandexSearchParserService {
   constructor(
     private readonly configService: ConfigService,
     private readonly xEvilService: XEvilService,
+    private readonly captchaGuruService: CaptchaGuruService,
     private readonly logger: Logger
   ) {
     this.config = this.configService.get<SearchConfig>('searchEngine')
@@ -53,9 +61,6 @@ export class YandexSearchParserService {
       } catch (e) {
         this.logger.error('Парсинг ссылок занял слишком много времени', e)
         throw new Error(e)
-        //await this.page.reloadSession()
-        //this.logger.log('Перезагрузили браузер')
-        //continue
       }
     }
 
@@ -115,6 +120,19 @@ export class YandexSearchParserService {
         await this.page.clickToCheckboxCaptcha()
         await sleep(3000)
         continue
+      }
+
+      if (pageType === YANDEX_SMART_CLICK_CAPTCHA) {
+        this.logger.log('Обнаружена клик капча')
+
+        const captchaFilePath = this.getCaptchaFilePath()
+        const isSaved = await this.page.saveClickCaptchaScreenshot(captchaFilePath)
+
+        if (isSaved) {
+          this.logger.log('Файл капчи сохранен')
+          const coordinates = await this.captchaGuruService.yandexSmartCaptcha(captchaFilePath)
+          await this.page.clickOnSmartCaptcha(coordinates)
+        }
       }
 
       if (pageType === YANDEX_IMAGE_CAPTCHA) {

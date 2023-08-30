@@ -10,6 +10,7 @@ import {
   articleGeneratorConfig,
   browserConfig,
   captchaConfig,
+  captchaGuruConfig,
   mailSearchConfig,
   parserConfig,
   readabilityConfig,
@@ -26,6 +27,7 @@ import { WordpressModule } from './modules/wordpress/wordpress.module'
 import { XEvilModule } from './modules/xevil/xevil.module'
 import { YandexSearchParserModule } from './modules/yandex-search-parser/yandex-search-parser.module'
 import { ParserModule } from './modules/parser/parser.module'
+import { CaptchaGuruModule } from './modules/captcha-guru/captcha-guru.module'
 
 const ENV = process.env.NODE_ENV
 
@@ -43,6 +45,7 @@ const ENV = process.env.NODE_ENV
         captchaConfig,
         parserConfig,
         readabilityConfig,
+        captchaGuruConfig,
       ],
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('dev', 'prod').default('dev'),
@@ -61,6 +64,7 @@ const ENV = process.env.NODE_ENV
         ARTICLE_GENERATOR_MAX_ARTICLE_COUNT: Joi.number().required(),
         READABILITY_AXIOS_TIMEOUT: Joi.number().required(),
         PARSER_BROWSER_TIMEOUT: Joi.number().required(),
+        CAPTCHA_GURU_API_KEY: Joi.string().allow(''),
       }),
     }),
     LoggerModule.forRoot({
@@ -84,6 +88,7 @@ const ENV = process.env.NODE_ENV
     ArticleGeneratorModule,
     YandexSearchParserModule,
     ParserModule,
+    CaptchaGuruModule,
   ],
   controllers: [AppController],
   providers: [AppService],

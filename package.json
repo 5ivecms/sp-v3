@@ -53,7 +53,7 @@
     "sharp": "^0.29.3",
     "url-parse": "^1.5.10",
     "uuid": "^8.3.2",
-    "webdriverio": "^7.29.1",
+    "webdriverio": "^7.32.4",
     "yargs": "^17.6.2"
   },
   "devDependencies": {
