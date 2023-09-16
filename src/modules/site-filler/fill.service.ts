@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { chunk } from 'lodash'
 
 import { millisToMinutesAndSeconds } from '../../utils'
@@ -7,7 +7,6 @@ import { GenerateArticleDto } from '../article-generator/dto'
 import { GenerateResult } from '../article-generator/types'
 import { KeywordsService } from '../keywords/keywords.service'
 import { LinksFilterService } from '../links-filter/links-filter.service'
-import { Logger } from '../logger/logger.service'
 import { ParseResult } from '../parser2/types'
 import { Site } from '../site/types'
 import { WordpressService } from '../wordpress/wordpress.service'

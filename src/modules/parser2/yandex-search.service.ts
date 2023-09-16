@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { Page } from 'puppeteer'
 
@@ -6,26 +6,23 @@ import { ParserConfig } from '../../config/parser.config'
 import { SearchConfig } from '../../config/search-engine.config'
 import { sleep } from '../../utils'
 import { Keyword } from '../keywords/types'
-import { Logger } from '../logger/logger.service'
 import { YandexSearchPage } from './pages/yandex-search.page'
 import { ParseResult } from './types'
 import { YandexCaptchaService } from './yandex-captcha.service'
 
 @Injectable()
 export class YandexSearchService {
+  private readonly logger = new Logger(YandexSearchService.name)
   private yandexPage: YandexSearchPage
-  private result: ParseResult[]
   private readonly config: SearchConfig
   private readonly parserConfig: ParserConfig
 
   constructor(
     private readonly yandexCaptchaService: YandexCaptchaService,
-    private readonly configService: ConfigService,
-    private readonly logger: Logger
+    private readonly configService: ConfigService
   ) {
     this.config = this.configService.get<SearchConfig>('searchEngine')
     this.parserConfig = this.configService.get<ParserConfig>('parser')
-    this.logger.setContext('YandexSearchService')
   }
 
   public async parse(page: Page, keywords: Keyword[]): Promise<ParseResult[]> {

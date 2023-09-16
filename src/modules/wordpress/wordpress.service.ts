@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import axios from 'axios'
 
 import { capitalizeFirstLetter } from '../../utils'
@@ -8,6 +8,7 @@ import { Site } from '../site/types'
 
 @Injectable()
 export class WordpressService {
+  private readonly logger = new Logger(WordpressService.name)
   public async saveArticle(data: GenerateResult, site: Site): Promise<boolean> {
     try {
       const auth = Buffer.from(`${site.login}:${site.password}`).toString('base64')
@@ -31,10 +32,7 @@ export class WordpressService {
       return true
     } catch (e) {
       if (e.code === 'ECONNABORTED') {
-        console.log('AXIOS TIMEOUT ПРИ ПОСТИНГЕ')
-      } else {
-        console.log(e)
-        console.log(e?.response?.data)
+        this.logger.error('AXIOS TIMEOUT ПРИ ПОСТИНГЕ')
       }
       return false
     }

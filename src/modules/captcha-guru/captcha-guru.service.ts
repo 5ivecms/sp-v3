@@ -1,19 +1,17 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import axios from 'axios'
 import { readFile } from 'fs-extra'
 
 import { CaptchaGuruConfig } from '../../config/captcha-guru.config'
 import { sleep } from '../../utils'
-import { Logger } from '../logger/logger.service'
 import { BASE_URL } from './constants'
 import { Coords, InResponse } from './types'
 
 @Injectable()
 export class CaptchaGuruService {
-  constructor(private readonly configService: ConfigService, private readonly logger: Logger) {
-    this.logger.setContext('CaptchaGuruService')
-  }
+  private readonly logger = new Logger(CaptchaGuruService.name)
+  constructor(private readonly configService: ConfigService) {}
 
   public async yandexSmartCaptcha(filePath: string): Promise<Coords[]> {
     const file = (await readFile(filePath)).toString('base64')
@@ -37,8 +35,6 @@ export class CaptchaGuruService {
 
     return coordinates
   }
-
-  // { status: 0, request: 'ERROR_CAPTCHA_UNSOLVABLE' }
 
   public async yandexClickCaptchaBase64(imageBase64: string): Promise<Coords[]> {
     const { apiKey } = this.configService.get<CaptchaGuruConfig>('captchaGuru')

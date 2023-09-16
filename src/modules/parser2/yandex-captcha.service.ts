@@ -1,15 +1,15 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { Page } from 'puppeteer'
 
 import { sleep } from '../../utils'
 import { CaptchaGuruService } from '../captcha-guru/captcha-guru.service'
-import { Logger } from '../logger/logger.service'
 import { YandexCaptcha } from './constants'
 import { YandexCaptchaPage } from './pages/yandex-captcha.page'
 
 @Injectable()
 export class YandexCaptchaService {
-  constructor(private readonly captchaGuruService: CaptchaGuruService, private readonly logger: Logger) {}
+  private readonly logger = new Logger(YandexCaptchaService.name)
+  constructor(private readonly captchaGuruService: CaptchaGuruService) {}
 
   public async solve(page: Page) {
     let captchaType = 'unknown'
@@ -29,10 +29,8 @@ export class YandexCaptchaService {
       }
 
       if (captchaType === 'click') {
-        console.log('click')
         const captchaBase64 = await captchaPage.saveClickCaptchaScreenshot()
         const coordinates = await this.captchaGuruService.yandexClickCaptchaBase64(captchaBase64)
-        console.log(coordinates)
         if (coordinates === null || !Array.isArray(coordinates)) {
           this.logger.error('Ошибка при получении координат для клик капчи')
           return false
@@ -51,7 +49,6 @@ export class YandexCaptchaService {
       }
 
       if (captchaType === 'image') {
-        console.log('image')
         const captchaBase64 = await captchaPage.saveImageCaptchaScreenshot()
         const text = await this.captchaGuruService.yandexTextCaptchaBase64(captchaBase64)
         await captchaPage.inputCaptchaText(text)
