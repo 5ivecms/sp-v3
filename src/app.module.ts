@@ -34,7 +34,7 @@ const ENV = process.env.NODE_ENV
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: !ENV ? '.env.dev' : `.env.${ENV}`,
+      envFilePath: !ENV ? '.env.development' : `.env.${ENV}`,
       load: [
         serverConfig,
         articleGeneratorConfig,
@@ -49,7 +49,7 @@ const ENV = process.env.NODE_ENV
         keywordsConfig,
       ],
       validationSchema: Joi.object({
-        NODE_ENV: Joi.string().valid('dev', 'prod').default('dev'),
+        NODE_ENV: Joi.string().valid('development', 'production').default('development'),
         PORT: Joi.number().default(5000),
         KEYWORDS_PER_THREAD: Joi.number().required(),
         BROWSER_HEADLESS: Joi.number().required(),
