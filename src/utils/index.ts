@@ -48,3 +48,11 @@ export const timeFunctionExecution = (func) => {
     return end - start // вычисляем разницу и возвращаем время выполнения в миллисекундах
   }
 }
+
+export const capitalizeFirstLetter = (string: string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1)
+}
+
+export const getErrorMessage = (error: any) => {
+  return error?.error || error?.message || error?.data?.message
+}

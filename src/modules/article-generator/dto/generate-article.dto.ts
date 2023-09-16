@@ -1,11 +1,13 @@
-import { IsArray, IsBoolean, IsString } from 'class-validator'
+import { IsArray, IsBoolean, IsObject } from 'class-validator'
+
+import { Keyword } from '../../../modules/keywords/types'
 
 export class GenerateArticleDto {
   @IsArray()
   public readonly urls: string[]
 
-  @IsString()
-  public readonly keyword: string
+  @IsObject()
+  public readonly keyword: Keyword
 
   @IsBoolean()
   public readonly addSource: boolean

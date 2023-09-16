@@ -1,52 +1,42 @@
 /* eslint-disable no-console */
 import { Injectable } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
 import axios from 'axios'
 
-import { SaveArticleDto } from './dto'
-import { WordpressApiUrls } from './wordpress.constants'
-import { WordpressKeyword } from './wordpress.types'
-import { WordpressConfig } from '../../config/wordpress.config'
+import { capitalizeFirstLetter } from '../../utils'
+import { GenerateResult } from '../article-generator/types'
+import { Site } from '../site/types'
 
 @Injectable()
 export class WordpressService {
-  private readonly config: WordpressConfig
-
-  constructor(private readonly configService: ConfigService) {
-    this.config = this.configService.get<WordpressConfig>('wordpress')
-  }
-
-  public async getKeywords(): Promise<WordpressKeyword[]> {
+  public async saveArticle(data: GenerateResult, site: Site): Promise<boolean> {
     try {
-      const { data } = await axios.get<WordpressKeyword[]>(`${this.config.domain}${WordpressApiUrls.GET_KEYWORDS}`, {
-        timeout: 60000 * 2,
-        params: { limit: this.config.keywordsPerTread },
-      })
-      return data
-    } catch (e) {
-      throw new Error(e)
-    }
-  }
-
-  public async saveArticles(dto: SaveArticleDto[]): Promise<boolean> {
-    try {
-      await axios.post(`${this.config.domain}${WordpressApiUrls.SAVE_ARTICLE}`, dto, {
-        maxBodyLength: Infinity,
-        maxContentLength: Infinity,
-        timeout: 600000 * 2,
-      })
+      const auth = Buffer.from(`${site.login}:${site.password}`).toString('base64')
+      await axios.post(
+        `${site.domain}/wp-json/wp/v2/posts/`,
+        {
+          title: capitalizeFirstLetter(data.keyword.keyword),
+          content: data.content,
+          categories: `${data.keyword.categoryId}`,
+          status: 'publish',
+        },
+        {
+          headers: {
+            Authorization: `Basic ${auth}`,
+          },
+          maxBodyLength: Infinity,
+          maxContentLength: Infinity,
+          timeout: 600000 * 2,
+        }
+      )
       return true
     } catch (e) {
       if (e.code === 'ECONNABORTED') {
         console.log('AXIOS TIMEOUT ПРИ ПОСТИНГЕ')
       } else {
         console.log(e)
+        console.log(e?.response?.data)
       }
       return false
     }
-  }
-
-  public findKeywordByText(keywords: WordpressKeyword[], text: string): WordpressKeyword | null {
-    return keywords.find((keyword) => keyword.keyword === text)
   }
 }

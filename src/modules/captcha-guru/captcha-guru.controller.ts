@@ -1,6 +1,7 @@
 import { Controller, Get } from '@nestjs/common'
-import { CaptchaGuruService } from './captcha-guru.service'
 import { path } from 'app-root-path'
+
+import { CaptchaGuruService } from './captcha-guru.service'
 
 @Controller('api/captcha-guru')
 export class CaptchaGuruController {
@@ -8,6 +9,11 @@ export class CaptchaGuruController {
 
   @Get('yandex-smart-captcha')
   public yandexSmartCaptcha() {
-    return this.captchaGuruService.yandexSmartCaptcha(`${path}/captcha/1eeaeb9e-3ae4-41a3-a62e-75ec89fd05a5.png`)
+    return this.captchaGuruService.yandexSmartCaptcha(`${path}/captcha/0e57a2c6-622e-40db-aee3-a3fcb9deb315.png`)
+  }
+
+  @Get('yandex-text-captcha')
+  public yandexTextCaptcha() {
+    return this.captchaGuruService.yandexTextCaptcha(`${path}/captcha/cb495d15-06fd-4b51-99e6-c88956996085.png`)
   }
 }

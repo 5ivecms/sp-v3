@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { readFile } from 'fs-extra'
 import axios from 'axios'
+import { readFile } from 'fs-extra'
 
 import { CaptchaGuruConfig } from '../../config/captcha-guru.config'
 import { sleep } from '../../utils'
-import { BASE_URL } from './constants'
-import { InResponse } from './types'
 import { Logger } from '../logger/logger.service'
+import { BASE_URL } from './constants'
+import { Coords, InResponse } from './types'
 
 @Injectable()
 export class CaptchaGuruService {
@@ -15,10 +15,69 @@ export class CaptchaGuruService {
     this.logger.setContext('CaptchaGuruService')
   }
 
-  public async yandexSmartCaptcha(filePath: string) {
+  public async yandexSmartCaptcha(filePath: string): Promise<Coords[]> {
     const file = (await readFile(filePath)).toString('base64')
+    const { apiKey } = this.configService.get<CaptchaGuruConfig>('captchaGuru')
 
-    const { requestId, status } = await this.in(file)
+    const { requestId, status } = await this.in({
+      key: apiKey,
+      type: 'base64',
+      body: file,
+      textinstructions: 'yandex',
+      click: 'oth',
+    })
+
+    if (status !== 'OK') {
+      return null
+    }
+
+    const response = await this.res(requestId)
+
+    const coordinates = this.parseCoordinates(response)
+
+    return coordinates
+  }
+
+  // { status: 0, request: 'ERROR_CAPTCHA_UNSOLVABLE' }
+
+  public async yandexClickCaptchaBase64(imageBase64: string): Promise<Coords[]> {
+    const { apiKey } = this.configService.get<CaptchaGuruConfig>('captchaGuru')
+
+    const { requestId, status } = await this.in({
+      key: apiKey,
+      type: 'base64',
+      body: imageBase64,
+      textinstructions: 'yandex',
+      click: 'oth',
+    })
+
+    if (status !== 'OK') {
+      return null
+    }
+
+    await sleep(2000)
+
+    const response = await this.res(requestId)
+    if (response === null) {
+      return null
+    }
+
+    const coordinates = this.parseCoordinates(response)
+
+    return coordinates
+  }
+
+  public async yandexTextCaptcha(filePath: string): Promise<string | null> {
+    const body = (await readFile(filePath)).toString('base64')
+    const { apiKey } = this.configService.get<CaptchaGuruConfig>('captchaGuru')
+
+    const { requestId, status } = await this.in({
+      key: apiKey,
+      body,
+      method: 'base64',
+      vernet: 18,
+    })
+
     if (status !== 'OK') {
       return null
     }
@@ -28,18 +87,29 @@ export class CaptchaGuruService {
     return response
   }
 
-  private async in(body: string): Promise<InResponse> {
-    try {
-      const { apiKey } = this.configService.get<CaptchaGuruConfig>('captchaGuru')
+  public async yandexTextCaptchaBase64(imageBase64: string): Promise<string | null> {
+    const { apiKey } = this.configService.get<CaptchaGuruConfig>('captchaGuru')
 
+    const { requestId, status } = await this.in({
+      key: apiKey,
+      body: imageBase64,
+      method: 'base64',
+      vernet: 18,
+    })
+
+    if (status !== 'OK') {
+      return null
+    }
+
+    const response = await this.res(requestId)
+
+    return response
+  }
+
+  private async in(options: object): Promise<InResponse> {
+    try {
       this.logger.log('Отправляем запрос')
-      const { data } = await axios.post(`${BASE_URL}/in.php`, {
-        key: apiKey,
-        type: 'base64',
-        body,
-        textinstructions: 'yandex',
-        click: 'oth',
-      })
+      const { data } = await axios.post(`${BASE_URL}/in.php`, options)
       const [status, requestId] = data.split('|')
       this.logger.log(`Ответ получен. Статус: ${status}`)
 
@@ -56,27 +126,25 @@ export class CaptchaGuruService {
 
       const tryCount = 10
 
-      let coordinates: object[] | null = null
-
       for (const i of Array.from(Array(tryCount).keys())) {
-        await sleep(1000)
+        await sleep(1500)
 
-        const coordinatesResponse = await axios.get(`${BASE_URL}/res.php`, {
-          params: { key: apiKey, id: requestId },
+        const response = await axios.get(`${BASE_URL}/res.php`, {
+          params: { key: apiKey, id: requestId, json: 1 },
         })
 
-        const [coordinatesStatus, data] = coordinatesResponse.data.split('|')
+        this.logger.log(`Response status: ${response.data.status}`)
 
-        this.logger.log(`Response status: ${coordinatesStatus}`)
-
-        if (coordinatesStatus === 'OK') {
-          coordinates = this.parseCoordinates(data)
-          this.logger.log(`Координаты получены`)
-          break
+        if (response.data.status === 1) {
+          this.logger.log(`Результат получен`)
+          return response.data.request
+        } else {
+          this.logger.error(`ERROR_CAPTCHA_UNSOLVABLE`)
+          return null
         }
       }
 
-      return coordinates
+      return null
     } catch (e) {
       this.logger.error(e)
       return null

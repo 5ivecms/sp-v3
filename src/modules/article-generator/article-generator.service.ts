@@ -5,6 +5,7 @@ import * as sanitizeHtml from 'sanitize-html'
 
 import { ReadabilityService } from '../readability/readability.service'
 import { GenerateArticleDto } from './dto'
+import { GenerateResult } from './types'
 
 @Injectable()
 export class ArticleGeneratorService {
@@ -18,11 +19,7 @@ export class ArticleGeneratorService {
     this.maxArticleCount = +this.configService.get<number>('articleGenerator.maxArticleCount')
   }
 
-  public async generate(dto: GenerateArticleDto): Promise<{
-    article: string
-    excerpt: string
-    keyword: string
-  } | null> {
+  public async generate(dto: GenerateArticleDto): Promise<GenerateResult | null> {
     const { urls, keyword, addSource } = dto
 
     if (urls.length < this.minArticleCount) {
@@ -56,7 +53,7 @@ export class ArticleGeneratorService {
 
     const article = resultArticlesContent.join('\n')
 
-    return { article, excerpt: articlesChunk[0].excerpt, keyword }
+    return { content: article, keyword }
   }
 
   private sanitize(content: string): string | null {
@@ -143,6 +140,6 @@ export class ArticleGeneratorService {
   }
 
   private generateSourceBlock(url: string) {
-    return `<div class="source-url"><a href="${url}" rel="noopener">Источник</a></div>`
+    return `<div class="source-url"><a href="${url}" rel="noopener" target="_blank">Источник</a></div>`
   }
 }

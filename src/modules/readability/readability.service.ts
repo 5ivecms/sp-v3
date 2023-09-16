@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common'
 import { Readability } from '@mozilla/readability'
-import { JSDOM, VirtualConsole } from 'jsdom'
-import axios from 'axios'
+import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import axios from 'axios'
+import { JSDOM, VirtualConsole } from 'jsdom'
 
-import { ReadabilityArticle } from './readability.types'
-import { GetReadabilityArticleByUrlDto, GetReadabilityArticleByUrlsDto } from './dto'
-import { promiseWithTimeout } from '../../utils'
 import { ReadabilityConfig } from '../../config/readability.config'
+import { promiseWithTimeout } from '../../utils'
+import { GetReadabilityArticleByUrlDto, GetReadabilityArticleByUrlsDto } from './dto'
+import { ReadabilityArticle } from './readability.types'
 
 type ContentData = {
   url: string
@@ -89,9 +89,9 @@ export class ReadabilityService {
 
       return { ...article, url }
     } catch (e) {
-      if (e.code === 'ECONNABORTED') {
+      /* if (e.code === 'ECONNABORTED') {
         console.log(`AXIOS TIMEOUT`)
-      }
+      } */
 
       return null
     }
@@ -124,9 +124,9 @@ export class ReadabilityService {
 
       return { url, data }
     } catch (e) {
-      if (e.code === 'ECONNABORTED') {
+      /* if (e.code === 'ECONNABORTED') {
         console.log(`AXIOS TIMEOUT`)
-      }
+      } */
 
       return null
     }

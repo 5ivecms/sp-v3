@@ -5,7 +5,7 @@
     "tsconfigRootDir": "./",
     "sourceType": "module"
   },
-  "plugins": ["prettier", "@typescript-eslint"],
+  "plugins": ["prettier", "@typescript-eslint", "import", "simple-import-sort", "unused-imports"],
   "extends": ["prettier", "plugin:prettier/recommended"],
   "root": true,
   "env": {
@@ -17,6 +17,13 @@
     "no-console": 1,
     "prettier/prettier": ["error", {
       "endOfLine":"auto"
-    }]
+    }],
+    "import/no-cycle": "off",
+    "import/prefer-default-export": "off",
+    "simple-import-sort/exports": "error",
+    "simple-import-sort/imports": "error",
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": "off"
+    
   }
 }

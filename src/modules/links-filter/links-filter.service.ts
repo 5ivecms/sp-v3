@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
-import * as URLParse from 'url-parse'
-import { readFile } from 'fs-extra'
 import { path } from 'app-root-path'
+import { readFile } from 'fs-extra'
+import * as URLParse from 'url-parse'
 
 import { getExtension } from '../../utils'
 import { FilterDto } from './dto'
-import { UrlParts } from './links-filter.types'
 import { BAD_EXTENSIONS } from './links-filter.constants'
+import { UrlParts } from './links-filter.types'
 
 @Injectable()
 export class LinksFilterService {
@@ -44,7 +44,7 @@ export class LinksFilterService {
   private async getBlackListDomains() {
     const blacklist = await readFile(`${path}/blacklist.txt`, 'utf8')
     return blacklist
-      .split('\r\n')
+      .split('\n')
       .map((domain) => domain.trim())
       .filter((domain) => domain.length > 0)
   }
