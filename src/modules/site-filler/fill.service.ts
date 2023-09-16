@@ -14,15 +14,13 @@ import { WordpressService } from '../wordpress/wordpress.service'
 
 @Injectable()
 export class FillService {
+  private readonly logger = new Logger(FillService.name)
   constructor(
-    private readonly logger: Logger,
     private readonly articleGeneratorService: ArticleGeneratorService,
     private readonly wordpressService: WordpressService,
     private readonly linksFilterService: LinksFilterService,
     private readonly keywordsService: KeywordsService
-  ) {
-    this.logger.setContext('FillService')
-  }
+  ) {}
 
   public async prepareData(data: ParseResult[]) {
     const result: GenerateArticleDto[] = []

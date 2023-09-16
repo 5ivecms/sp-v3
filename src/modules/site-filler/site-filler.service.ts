@@ -26,7 +26,6 @@ export class SiteFillerService {
   private keywordsConfig: KeywordsConfig
   private keywords: Keyword[] = []
   private parseResult: ParseResult[] = []
-
   private readonly logger = new Logger(SiteFillerService.name)
 
   constructor(
