@@ -16,6 +16,7 @@ import {
   readabilityConfig,
   searchEngineConfig,
   serverConfig,
+  threadConfig,
 } from './config'
 import siteConfig from './config/site.config'
 import { ArticleGeneratorModule } from './modules/article-generator/article-generator.module'
@@ -47,6 +48,7 @@ const ENV = process.env.NODE_ENV
         dbServer,
         siteConfig,
         keywordsConfig,
+        threadConfig,
       ],
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'production').default('development'),
@@ -63,6 +65,7 @@ const ENV = process.env.NODE_ENV
         PUPPETEER_HEADLESS: Joi.string().required(),
         DB_SERVER: Joi.string().required(),
         SITE_ID: Joi.number().required(),
+        THREAD_ID: Joi.number().required(),
       }),
     }),
     /*     LoggerModule.forRoot({
