@@ -5,6 +5,7 @@ import { ensureDir, remove } from 'fs-extra'
 import puppeteer, { Browser } from 'puppeteer'
 
 import { ThreadConfig } from '../../config/thread.config'
+import { sleep } from '../../utils'
 import { Keyword } from '../keywords/types'
 import { ParseDto } from './dto'
 import { YandexSearchPage } from './pages/yandex-search.page'
@@ -30,7 +31,7 @@ export class Parser2Service {
 
   public async initBrowser(headless: boolean | 'new'): Promise<Browser> {
     const { threadId } = this.configService.get<ThreadConfig>('threadConfig')
-    console.log(threadId)
+    await sleep(Number(threadId) * 1000)
     await remove(`${path}/chromeProfiles/chromeProfile${threadId}`)
     await this.createFolders()
     return await puppeteer.launch({ headless: headless, userDataDir: this.getProfileFolder() })
